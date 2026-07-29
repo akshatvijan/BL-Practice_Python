@@ -1,0 +1,7 @@
+dunder methods arw double underscore methods that are also called as magic funtion this are automatically called by oython when you perform function like + print len etc
+__init__ this function is gnerally called when you automatically during the object creating to allocate obj with memory and initialization
+eg __init__
+__str__
+__len__
+
+ 
