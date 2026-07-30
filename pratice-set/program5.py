@@ -1,0 +1,6 @@
+a=input("Enter the employees with access rights (comma-separated)")
+b=input("Enter the current employees (comma-separated):")
+s1=set(a.lower().split(', '))
+s2=set(b.lower().split(', '))
+s1.intersection_update(s2)
+print(s1)
