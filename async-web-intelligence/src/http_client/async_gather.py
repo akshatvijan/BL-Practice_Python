@@ -1,54 +1,68 @@
 import httpx
 import asyncio
 Max_Retries=3
+Max_concurrent=5
+semaphore=asyncio.Semaphore(Max_concurrent)
+timeout=httpx.Timeout(
+    connect=5.0,
+    read=10.0,
+    write=5.0,
+    pool=5.0
+
+)
+   
+
+
 async def async_fetch(url):
-    for i in range(Max_Retries):
-        try:
-            async with httpx.AsyncClient() as client:
-                response=await client.get(url,timeout=10)
-                response.raise_for_status()
+    async with semaphore:
+        for i in range(Max_Retries):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response=await client.get(url,timeout=timeout)
+                    response.raise_for_status()
 
-                return {
-                    "url":url,
-                    "status_code":response.status_code,
-                    "content":response.text
-                }
-        except httpx.TimeoutException:
-            if i==Max_Retries-1:
-                return {
-                    "url":url,
-                    "error":"timeout error",
-
-                }
-        except httpx.HTTPStatusError:
-            if 400 <= response.status_code < 500:
-                return {
-                    "url": url,
-                    "status_code": response.status_code,
-                    "error": "Client error"
-                }
-
-            elif 500 <= response.status_code < 600:
+                    return {
+                        "url":url,
+                        "status_code":response.status_code,
+                        "content":response.text
+                    }
+            except httpx.TimeoutException:
                 if i==Max_Retries-1:
+                    return {
+                        "url":url,
+                        "error":"timeout error",
+
+                    }
+            except httpx.HTTPStatusError:
+                if 400 <= response.status_code < 500:
                     return {
                         "url": url,
                         "status_code": response.status_code,
-                        "error": "Server error"
+                        "error": "Client error"
                     }
 
-            else:
+                elif 500 <= response.status_code < 600:
+                    if i==Max_Retries-1:
+                        return {
+                            "url": url,
+                            "status_code": response.status_code,
+                            "error": "Server error"
+                        }
+
+                else:
+                    if i==Max_Retries-1:
+                        return {
+                            "url": url,
+                            "status_code": response.status_code,
+                            "error": "HTTP error"
+                        }
+            except httpx.ConnectError:
                 if i==Max_Retries-1:
                     return {
-                        "url": url,
-                        "status_code": response.status_code,
-                        "error": "HTTP error"
+                        "url":url,
+                        "error":"Connection errro"
                     }
-        except httpx.ConnectError:
-            if i==Max_Retries-1:
-                return {
-                    "url":url,
-                    "error":"Connection errro"
-                }
+            
 
 
 

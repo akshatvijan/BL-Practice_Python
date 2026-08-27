@@ -1,0 +1,86 @@
+openapi: 3.1.0
+
+info:
+  title: Web Intelligence Collector API
+  version: 1.0.0
+
+paths:
+
+  /crawl:
+    post:
+      summary: Crawl URLs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - urls
+              properties:
+                urls:
+                  type: array
+                  items:
+                    type: string
+
+      responses:
+        "200":
+          description: Crawl results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_urls:
+                    type: integer
+                  successful:
+                    type: integer
+                  failed:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url:
+                          type: string
+                        title:
+                          type: string
+                        status:
+                          type: string
+                        data:
+                          type: object
+
+
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+
+
+  /results:
+    get:
+      summary: Get crawl results
+      responses:
+        "200":
+          description: Crawl results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
