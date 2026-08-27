@@ -32,11 +32,19 @@ async def async_fetch(url):
 
 
 async def async_fetch_many(urls):
-    task=[]
+    tasks=[]
     for url in urls:
-        task.append(async_fetch(url))
-    result=await asyncio.gather(*task)
-    return result
+        task=asyncio.create_task(async_fetch(url))
+        tasks.append(task)
+    request1= await tasks[0]
+    request2= await tasks[1]
+    request3= await tasks[2]
+
+    return  [request1,request2,request3]
+
+
+
+
         
 
 
